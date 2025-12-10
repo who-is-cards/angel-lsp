@@ -13,6 +13,7 @@ import {AnalyzerScope} from "../compiler_analyzer/analyzerScope";
 import {TextPosition} from "../compiler_tokenizer/textLocation";
 import {findScopeContainingPosition} from "../service/utils";
 import {moveDiagnosticsByChanges} from "../service/contentChangeApplier";
+import {resolveIncludeUri} from "../service/fileUtils";
 
 interface InspectRecord {
     content: string;
@@ -154,8 +155,45 @@ export class Inspector {
     //     record.isOpen = false;
     // }
 
-    public deleteRecord(uri: string): void {
+    public deleteRecord(uri: string): string[] {
+        const dependent_uris = this.findDependentFiles(uri);
         this._inspectRecords.delete(uri);
+        return dependent_uris;
+    }
+
+    private findDependentFiles(target_uri: string): string[] {
+        const dependent_uris: string[] = [];
+        for (const record of this._inspectRecords.values()) {
+            if (this.fileIncludesTarget(record, target_uri, new Set())) {
+                dependent_uris.push(record.uri);
+            }
+        }
+        return dependent_uris;
+    }
+
+    private fileIncludesTarget(record: InspectRecord, target_uri: string, visited: Set<string>): boolean {
+        if (visited.has(record.uri)) {
+            return false;
+        }
+        visited.add(record.uri);
+
+        for (const include_token of record.preprocessedOutput.includePathTokens) {
+            const resolved_uri = this.resolveIncludeUri(record.uri, include_token.getStringContent());
+            if (resolved_uri === target_uri) {
+                return true;
+            }
+            const included_record = this._inspectRecords.get(resolved_uri);
+            if (included_record !== undefined) {
+                if (this.fileIncludesTarget(included_record, target_uri, visited)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private resolveIncludeUri(base_uri: string, relative_path: string): string {
+        return resolveIncludeUri(base_uri, relative_path);
     }
 
     /**

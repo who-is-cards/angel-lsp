@@ -227,21 +227,33 @@ s_connection.onDidCloseTextDocument(params => {
 
 s_connection.workspace.onDidRenameFiles(params => {
     for (const renamed of params.files) {
-        s_inspector.deleteRecord(renamed.oldUri);
+        const dependent_uris = s_inspector.deleteRecord(renamed.oldUri);
         s_connection.sendDiagnostics({
             uri: renamed.oldUri,
             diagnostics: []
         });
+        for (const dependent_uri of dependent_uris) {
+            const record = s_inspector.getRecord(dependent_uri);
+            if (record.content.length > 0) {
+                s_inspector.inspectFile(dependent_uri, record.content);
+            }
+        }
     }
 });
 
 s_connection.workspace.onDidDeleteFiles(params => {
     for (const deleted of params.files) {
-        s_inspector.deleteRecord(deleted.uri);
+        const dependent_uris = s_inspector.deleteRecord(deleted.uri);
         s_connection.sendDiagnostics({
             uri: deleted.uri,
             diagnostics: []
         });
+        for (const dependent_uri of dependent_uris) {
+            const record = s_inspector.getRecord(dependent_uri);
+            if (record.content.length > 0) {
+                s_inspector.inspectFile(dependent_uri, record.content);
+            }
+        }
     }
 });
 
