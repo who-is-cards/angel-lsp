@@ -228,13 +228,20 @@ s_connection.onDidCloseTextDocument(params => {
 s_connection.workspace.onDidRenameFiles(params => {
     for (const renamed of params.files) {
         s_inspector.deleteRecord(renamed.oldUri);
-        // FIXME: Handle for the new name?
+        s_connection.sendDiagnostics({
+            uri: renamed.oldUri,
+            diagnostics: []
+        });
     }
 });
 
 s_connection.workspace.onDidDeleteFiles(params => {
     for (const deleted of params.files) {
         s_inspector.deleteRecord(deleted.uri);
+        s_connection.sendDiagnostics({
+            uri: deleted.uri,
+            diagnostics: []
+        });
     }
 });
 
