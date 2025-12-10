@@ -174,8 +174,7 @@ export class AnalysisResolver {
         logger.message(`(${process.memoryUsage().heapUsed / 1024 / 1024} MB used)`);
     }
 
-    // We will reanalyze the files that include the file specified by the given URI.
-    private reanalyzeFilesWithDependency(targetUri: string, reanalyzeDependents: boolean) {
+    public reanalyzeFilesWithDependency(targetUri: string, reanalyzeDependents: boolean) {
         const resolvedSet = new Set<string>();
         this.reanalyzeFilesWithDependencyInternal(resolvedSet, targetUri, reanalyzeDependents);
     }

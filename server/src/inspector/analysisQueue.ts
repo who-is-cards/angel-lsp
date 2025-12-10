@@ -53,6 +53,11 @@ export class AnalysisQueue<Record extends RecordElement> {
             this._indirectQueue.some(r => r.record.uri === uri);
     }
 
+    public removeFromQueue(uri: string): void {
+        this._directQueue = this._directQueue.filter(r => r.record.uri !== uri);
+        this._indirectQueue = this._indirectQueue.filter(r => r.record.uri !== uri);
+    }
+
     /**
      * Push the record to the front of the direct queue.
      * This is used for urgent processing.
