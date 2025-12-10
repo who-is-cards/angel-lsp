@@ -156,6 +156,10 @@ export class Inspector {
 
     public deleteRecord(uri: string): void {
         this._inspectRecords.delete(uri);
+        this._diagnosticsCallback({
+            uri: uri,
+            diagnostics: [],
+        });
     }
 
     /**

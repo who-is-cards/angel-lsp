@@ -18,5 +18,9 @@
 	"scripts": {
 		"test": "mocha",
 		"bundle": "tsc && npx esbuild src/server.ts --bundle --outfile=angelscript-language-server.js --minify --platform=node"
+	},
+	"devDependencies": {
+		"@types/node": "^25.0.0",
+		"typescript": "^5.9.3"
 	}
 }
